@@ -92,7 +92,7 @@ flowchart LR
 | `build-test` | push em `main`/`develop`, PR para `main`, manual | `./mvnw -B verify`: compila, roda 75 testes unitários e `@WebMvcTest`, gera o JaCoCo. Publica os relatórios como artifact e o resumo dos testes na página da execução |
 | `integration-test` | idem | Sobe `mongo:7` como *service container* e roda `./mvnw -B verify -Pintegration` (failsafe, `*IT.java`) |
 | `docker` | só **push na `main`**, após os dois anteriores | Login no GHCR com o `GITHUB_TOKEN`, `docker build --build-arg APP_VERSION=<sha>`, push de `:<sha>` e `:latest` |
-| `deploy-staging` | após `docker` | Environment `staging`. Chama o Deploy Hook do Render com `imgURL=ghcr.io/<owner>/comed-esg:<sha>` e faz o **smoke test** |
+| `deploy-staging` | após `docker` | Environment `staging`. Chama o Deploy Hook do Render com `imgURL=ghcr.io/matheus-costa2004/comed-esg:<sha>` e faz o **smoke test** |
 | `deploy-production` | após staging **+ aprovação** | Environment `production` com *Required reviewers*. Mesmo processo com o hook de produção |
 
 **Smoke test:** consulta `/api/info` a cada 15 s por até 12 min (cold start do Render free) até

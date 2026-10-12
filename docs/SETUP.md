@@ -3,9 +3,8 @@
 Este guia leva o projeto do repositório local até os ambientes de **staging** e **produção**.
 Siga na ordem: cada passo depende do anterior.
 
-> Troque `<owner>` pelo seu usuário do GitHub (em minúsculas na URL da imagem).
 
-**Pré-requisito: MongoDB Atlas.** O cluster `Cluster0` (free, AWS São Paulo) recebe dois databases,
+**Pré-requisito: MongoDB Atlas.** O cluster `comed-esg` (projeto *CoMed ESG*, free, AWS São Paulo) recebe dois databases,
 `comed_staging` e `comed_prod`. As duas connection strings são entregues **só pelo chat**, nunca
 em arquivos do repositório. O acesso `0.0.0.0/0` fica liberado porque o Render free não tem IP fixo.
 
@@ -20,7 +19,7 @@ environment só funcionam em repositórios públicos.
 2. Na pasta do projeto:
 
    ```bash
-   git remote add origin https://github.com/<owner>/comed-esg.git
+   git remote add origin https://github.com/Matheus-Costa2004/comed-esg.git
    git push -u origin main
    ```
 
@@ -32,7 +31,7 @@ O push na `main` dispara o workflow **CI/CD** (aba *Actions*):
 |---|---|
 | Build e testes unitários | ✅ |
 | Testes de integração (MongoDB) | ✅ |
-| Imagem Docker → GHCR | ✅ publica `ghcr.io/<owner>/comed-esg:<sha>` e `:latest` |
+| Imagem Docker → GHCR | ✅ publica `ghcr.io/matheus-costa2004/comed-esg:<sha>` e `:latest` |
 | Deploy em staging | ❌ `Secret ausente`: o Render ainda não existe |
 | Deploy em produção | não roda (depende de staging) |
 
@@ -55,7 +54,7 @@ Repita para cada ambiente em <https://dashboard.render.com> → **New** → **We
 
 | Campo | Staging | Produção |
 |---|---|---|
-| Image URL | `ghcr.io/<owner>/comed-esg:latest` | `ghcr.io/<owner>/comed-esg:latest` |
+| Image URL | `ghcr.io/matheus-costa2004/comed-esg:latest` | `ghcr.io/matheus-costa2004/comed-esg:latest` |
 | Name | `comed-esg-staging` | `comed-esg-prod` |
 | Region | Virginia (US East) | Virginia (US East) |
 | Instance Type | **Free** | **Free** |
@@ -107,7 +106,7 @@ O job de imagem só roda em `push` na `main`, então use uma destas formas:
 
 O que acontece:
 
-1. `Deploy em staging` chama o hook com `imgURL=ghcr.io/<owner>/comed-esg:<sha>` e consulta
+1. `Deploy em staging` chama o hook com `imgURL=ghcr.io/matheus-costa2004/comed-esg:<sha>` e consulta
    `STAGING_URL/api/info` a cada 15 s (até 12 min, por causa do cold start do plano free) até
    `versao` ser o SHA do commit. Depois confere `/actuator/health` = `UP`.
 2. `Deploy em produção` fica **Waiting**. Clique em **Review deployments** → marque `production`

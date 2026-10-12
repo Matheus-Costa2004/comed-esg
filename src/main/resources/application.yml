@@ -43,10 +43,13 @@ info:
     versao: ${comed.versao}
     ambiente: ${comed.ambiente}
 
+# Swagger habilitado de propósito em todos os ambientes: é evidência da entrega.
 springdoc:
   swagger-ui:
+    enabled: true
     path: /swagger-ui.html
   api-docs:
+    enabled: true
     path: /v3/api-docs
 
 logging:

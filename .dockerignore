@@ -1,0 +1,22 @@
+# Só pom.xml e src/ entram no build; o resto fica fora do contexto enviado ao Docker.
+target/
+.git/
+.github/
+.mvn/
+mvnw
+mvnw.cmd
+docs/
+scripts/
+*.md
+*.zip
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.iml
+logs/
+*.log
+docker-compose*.yml
+Dockerfile
+.dockerignore

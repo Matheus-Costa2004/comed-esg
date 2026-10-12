@@ -1,0 +1,88 @@
+# Ambiente local completo: API + MongoDB próprio (o ambiente local não usa o Atlas).
+#   cp .env.example .env
+#   docker compose up -d --build
+#   docker compose --profile tools up -d     # inclui o mongo-express em http://localhost:8081
+name: comed-esg
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: comed-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?defina MONGO_ROOT_USER no .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?defina MONGO_ROOT_PASSWORD no .env}
+    ports:
+      # Só no localhost da máquina, para usar o Compass ou o mongosh.
+      - "127.0.0.1:${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - comed-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  api:
+    build:
+      context: .
+      args:
+        APP_VERSION: ${APP_VERSION:-local}
+    image: comed-esg:local
+    container_name: comed-api
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE:-comed}?authSource=admin
+      APP_ENV: ${APP_ENV:-local}
+      APP_VERSION: ${APP_VERSION:-local}
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      FATOR_CO2_KG_POR_KM: ${FATOR_CO2_KG_POR_KM:-0.13}
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+      LOG_FILE: /app/logs/comed-esg.log
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - api-logs:/app/logs
+    networks:
+      - comed-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: comed-mongo-express
+    profiles:
+      - tools
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongo:27017/?authSource=admin
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_USER:-admin}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_PASSWORD:?defina ME_PASSWORD no .env}
+    ports:
+      - "127.0.0.1:${MONGO_EXPRESS_PORT:-8081}:8081"
+    networks:
+      - comed-net
+
+volumes:
+  mongo-data:
+    name: comed-mongo-data
+  api-logs:
+    name: comed-api-logs
+
+networks:
+  comed-net:
+    name: comed-net
+    driver: bridge

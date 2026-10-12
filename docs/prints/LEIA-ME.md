@@ -16,7 +16,7 @@ Só valem capturas de execuções reais.
 | 9 | `09-status-producao.png` | Página de status com o selo **PRODUCTION** (verde) e o mesmo SHA | `PROD_URL/` |
 | 10 | `10-indicadores-esg-producao.png` | JSON de `/api/esg/indicadores` | `PROD_URL/api/esg/indicadores` |
 | 11 | `11-swagger.png` | Swagger UI com os grupos de endpoints | `/swagger-ui.html` (qualquer ambiente) |
-| 12 | `12-docker-compose-ps.png` | Saída de `docker compose ps` com `comed-api` e `comed-mongo` *healthy* | Terminal local |
+| 12 | `12-docker-compose-ps.png` | Saída de `docker compose ps` com `comed-api` e `comed-mongo` *healthy* | Terminal local ou do Codespace |
 | 13 | `13-atlas-databases.png` | `comed_staging` e `comed_prod` no Data Explorer | Atlas → projeto CoMed ESG → comed-esg → Browse Collections |
 
 Dica: nos prints 8 e 9, deixe a barra de endereço visível para mostrar a URL de cada ambiente.

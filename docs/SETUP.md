@@ -115,6 +115,24 @@ O que acontece:
 
 Com tudo verde, tire os prints listados em [`docs/prints/LEIA-ME.md`](prints/LEIA-ME.md).
 
+## 8. Validar o docker-compose (local ou no Codespace)
+
+O pipeline não usa o `docker-compose.yml`; ele é o ambiente local. Se o Docker não sobe na sua
+máquina, valide-o num **GitHub Codespace**, que já vem com Docker e Compose v2:
+
+1. No repositório: **Code** → **Codespaces** → **Create codespace on main**.
+2. No terminal do Codespace:
+
+   ```bash
+   cp .env.example .env            # troque as senhas no .env
+   docker compose up -d --build
+   docker compose ps               # comed-api e comed-mongo "healthy" → print 12
+   ```
+
+3. Aba **Ports** → porta `8080` → ícone de globo abre a página de status
+   (`https://<nome-do-codespace>-8080.app.github.dev/`).
+4. Ao terminar: `docker compose down` e **Stop codespace**, para não gastar a cota gratuita.
+
 ---
 
 ### Problemas comuns
@@ -125,3 +143,4 @@ Com tudo verde, tire os prints listados em [`docs/prints/LEIA-ME.md`](prints/LEI
 | Smoke test esgota as 48 tentativas | Deploy falhou no Render: veja *Logs* do serviço (geralmente `MONGODB_URI` errada) |
 | `/actuator/health` com `mongo: DOWN` | Usuário/senha da string ou acesso de rede no Atlas |
 | Produção não pede aprovação | Repositório privado ou *Required reviewers* não marcado |
+| Docker Desktop não inicia na máquina (hipervisor/virtualização) | Use o Codespace do passo 8 para rodar o compose |

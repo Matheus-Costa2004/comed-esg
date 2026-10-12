@@ -20,7 +20,8 @@ automatizados, containerização e pipeline CI/CD com deploy em **staging** e **
 
 ## Como executar localmente com Docker
 
-**Pré-requisito:** Docker Desktop (ou Docker Engine + Compose v2).
+**Pré-requisito:** Docker Desktop (ou Docker Engine + Compose v2). Sem Docker na máquina, use um
+GitHub Codespace (abaixo): os mesmos comandos funcionam lá.
 
 ```bash
 cp .env.example .env            # PowerShell: Copy-Item .env.example .env
@@ -46,6 +47,27 @@ docker compose exec api tail -f /app/logs/comed-esg.log        # log em arquivo 
 docker compose down                                            # para tudo, mantém os dados
 docker compose down -v                                         # para tudo e apaga os volumes
 ```
+
+### Alternativa: GitHub Codespaces (sem Docker local)
+
+Quando o Docker não sobe na máquina (virtualização desligada na BIOS, Windows sem Hyper-V/WSL 2 etc.),
+o compose roda igual num Codespace, que já vem com Docker e Compose v2.
+
+1. No repositório no GitHub: **Code** → aba **Codespaces** → **Create codespace on main**.
+2. No terminal do Codespace, os mesmos comandos de antes:
+
+   ```bash
+   cp .env.example .env            # edite o .env e troque as senhas
+   docker compose up -d --build
+   docker compose ps               # aguarde comed-api e comed-mongo ficarem "healthy"
+   ```
+
+3. Na aba **Ports**, a porta `8080` aparece encaminhada: clique no ícone de globo para abrir a página
+   de status. A URL é do tipo `https://<nome-do-codespace>-8080.app.github.dev/` e substitui o
+   `http://localhost:8080` da tabela acima (o mesmo vale para a `8081` do mongo-express).
+
+Ao terminar, `docker compose down` e pare o Codespace (**Codespaces** → **Stop codespace**) para não
+consumir a cota gratuita de horas.
 
 **Principais endpoints** (todos em `/api`):
 

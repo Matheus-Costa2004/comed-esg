@@ -1,4 +1,4 @@
-# Produção: só o essencial no log.
+# Produção: só o essencial no log
 logging:
   level:
     root: WARN

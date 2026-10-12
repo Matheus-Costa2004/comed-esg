@@ -10,11 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
-/**
- * Pilares Social e Ambiental. A telemedicina guarda o impacto evitado
- * ({@code distanciaEvitadaKm}, {@code co2EvitadoKg}); a presencial guarda
- * {@code clinica} e {@code deslocamentoKmPaciente}.
- */
+/** Pilares Social e Ambiental: a teleconsulta guarda o impacto evitado; a presencial, a clínica e o deslocamento. */
 @Document("consultas")
 public class Consulta {
 

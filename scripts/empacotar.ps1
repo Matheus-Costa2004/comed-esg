@@ -1,5 +1,4 @@
-# Gera comed-esg.zip na raiz do projeto, sem target/, .env, .git e node_modules.
-# Uso (na raiz ou em qualquer pasta):  powershell -ExecutionPolicy Bypass -File scripts\empacotar.ps1
+# Gera comed-esg.zip na raiz, sem target/, .env, .git e node_modules
 $ErrorActionPreference = 'Stop'
 
 $raiz = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path

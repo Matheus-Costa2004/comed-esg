@@ -1,4 +1,4 @@
-# Só pom.xml e src/ entram no build; o resto fica fora do contexto enviado ao Docker.
+# Só pom.xml e src/ entram no contexto do build
 target/
 .git/
 .github/

@@ -1,7 +1,4 @@
-# Ambiente local completo: API + MongoDB próprio (o ambiente local não usa o Atlas).
-#   cp .env.example .env
-#   docker compose up -d --build
-#   docker compose --profile tools up -d     # inclui o mongo-express em http://localhost:8081
+# Ambiente local: API + MongoDB em container (não usa o Atlas)
 name: comed-esg
 
 services:
@@ -13,7 +10,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?defina MONGO_ROOT_USER no .env}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?defina MONGO_ROOT_PASSWORD no .env}
     ports:
-      # Só no localhost da máquina, para usar o Compass ou o mongosh.
+      # Exposto só no localhost, para o Compass ou o mongosh
       - "127.0.0.1:${MONGO_PORT:-27017}:27017"
     volumes:
       - mongo-data:/data/db
@@ -58,6 +55,7 @@ services:
       retries: 5
       start_period: 60s
 
+  # Sobe só com: docker compose --profile tools up -d
   mongo-express:
     image: mongo-express:1.0.2
     container_name: comed-mongo-express

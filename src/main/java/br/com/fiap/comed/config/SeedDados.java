@@ -32,10 +32,7 @@ import br.com.fiap.comed.repository.EventoAuditoriaRepository;
 import br.com.fiap.comed.repository.MedicoRepository;
 import br.com.fiap.comed.repository.PacienteRepository;
 
-/**
- * Dados de exemplo da atividade anterior. Ativado por {@code comed.seed.enabled} (SEED_ENABLED)
- * e só insere numa collection vazia, então é seguro rodar a cada inicialização.
- */
+/** Dados de exemplo (SEED_ENABLED); só insere em collection vazia, então pode rodar a cada inicialização. */
 @Component
 @ConditionalOnProperty(name = "comed.seed.enabled", havingValue = "true")
 public class SeedDados implements CommandLineRunner {
@@ -76,8 +73,6 @@ public class SeedDados implements CommandLineRunner {
         List<T> inseridos = repository.saveAll(dados.get());
         log.info("Seed: {} documentos inseridos em {}", inseridos.size(), collection);
     }
-
-    // ---------------------------------------------------------------- pacientes
 
     private List<Paciente> pacientes() {
         return List.of(
@@ -129,8 +124,6 @@ public class SeedDados implements CommandLineRunner {
         return p;
     }
 
-    // ---------------------------------------------------------------- médicos
-
     private List<Medico> medicos() {
         return List.of(
                 medico("Dr. Rafael Costa", "58432-SP", "Clínica Geral", StatusCompliance.regular, null,
@@ -158,8 +151,6 @@ public class SeedDados implements CommandLineRunner {
         m.setDataExpiracaoCrm(expiracaoCrm);
         return m;
     }
-
-    // ---------------------------------------------------------------- consultas
 
     private List<Consulta> consultas() {
         return List.of(
@@ -206,8 +197,6 @@ public class SeedDados implements CommandLineRunner {
         c.setMotivo(motivo);
         return c;
     }
-
-    // ---------------------------------------------------------------- alertas
 
     private List<AlertaIa> alertas() {
         return List.of(
@@ -262,8 +251,6 @@ public class SeedDados implements CommandLineRunner {
         a.setDataRevisao(revisadoEm == null ? null : Instant.parse(revisadoEm));
         return a;
     }
-
-    // ---------------------------------------------------------------- auditoria
 
     private List<EventoAuditoria> eventosAuditoria() {
         return List.of(

@@ -1,4 +1,4 @@
-# Staging: logs detalhados da aplicação para depurar antes da produção.
+# Staging: logs detalhados para depurar antes da produção
 logging:
   level:
     root: INFO

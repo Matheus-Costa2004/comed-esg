@@ -6,7 +6,7 @@ logs/
 # Credenciais locais (use .env.example como modelo)
 .env
 
-# Pacote de entrega gerado por scripts/empacotar
+# Gerado por scripts/empacotar
 comed-esg.zip
 
 # IDEs

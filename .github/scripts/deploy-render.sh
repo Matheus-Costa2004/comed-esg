@@ -1,16 +1,8 @@
 #!/usr/bin/env bash
-# Dispara o Deploy Hook do Render com a imagem do commit e espera a nova versão responder.
-#
-# Variáveis esperadas:
-#   AMBIENTE      staging | production (só para as mensagens)
-#   DEPLOY_HOOK   URL do Deploy Hook do serviço no Render (secret)
-#   APP_URL       URL pública do serviço (variable)
-#   IMAGEM        imagem completa, ex.: ghcr.io/dono/comed-esg:<sha>
-#   VERSAO        SHA esperado em /api/info
-#   TENTATIVAS    opcional, padrão 48 (48 x 15 s = 12 min, cobre o cold start do plano free)
+# Dispara o Deploy Hook do Render e espera /api/info responder com a nova versão
 set -euo pipefail
 
-TENTATIVAS="${TENTATIVAS:-48}"
+TENTATIVAS="${TENTATIVAS:-48}"  # 48 x 15 s = 12 min, cobre o cold start do Render free
 INTERVALO=15
 
 if [[ -z "${DEPLOY_HOOK:-}" ]]; then

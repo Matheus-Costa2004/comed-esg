@@ -11,10 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-/**
- * Pilar Governança. Todo alerta nasce com {@code revisadoPorMedico = false}:
- * a IA sugere, o médico decide (humano-no-loop).
- */
+/** Pilar Governança: todo alerta nasce sem revisão; a IA sugere, o médico decide. */
 @Document("alertas_ia")
 public class AlertaIa {
 

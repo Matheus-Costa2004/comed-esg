@@ -7,7 +7,7 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Um pipeline por branch; um deploy em andamento nunca é cancelado no meio.
+# Um pipeline por branch, sem cancelar deploy em andamento
 concurrency:
   group: ci-cd-${{ github.ref }}
   cancel-in-progress: false
@@ -16,7 +16,6 @@ permissions:
   contents: read
 
 jobs:
-  # ----------------------------------------------------------------- CI
   build-test:
     name: Build e testes unitários
     runs-on: ubuntu-latest
@@ -87,7 +86,6 @@ jobs:
             target/site/jacoco/
           retention-days: 14
 
-  # ----------------------------------------------------------------- CD
   docker:
     name: Imagem Docker → GHCR
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -154,7 +152,7 @@ jobs:
 
   deploy-production:
     name: Deploy em produção
-    # A aprovação manual vem dos "Required reviewers" do environment production.
+    # Aprovação manual pelos Required reviewers do environment production
     needs: [docker, deploy-staging]
     runs-on: ubuntu-latest
     environment:

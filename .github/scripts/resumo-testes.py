@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Escreve no $GITHUB_STEP_SUMMARY uma tabela com os resultados dos testes e a cobertura do JaCoCo.
-
-Uso: resumo-testes.py "<título>" <pasta-de-relatórios-xml> [jacoco.csv]
-"""
+"""Escreve no $GITHUB_STEP_SUMMARY o resultado dos testes e a cobertura do JaCoCo."""
 import csv
 import glob
 import os

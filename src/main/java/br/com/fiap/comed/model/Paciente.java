@@ -17,10 +17,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-/**
- * Pilar Social. Os campos comuns são tipados; o que depende da condição clínica
- * (HbA1c, semana gestacional, cuidador, idioma...) vai em {@code dadosClinicos}.
- */
+/** Pilar Social: campos comuns tipados; o que depende da condição clínica vai em dadosClinicos. */
 @Document("pacientes")
 public class Paciente {
 

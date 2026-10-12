@@ -47,7 +47,7 @@ public class ConsultaService {
         repository.delete(buscar(id));
     }
 
-    /** CO2 que o paciente deixaria de emitir: distância x 2 (ida e volta) x fator, em kg. */
+    /** CO2 evitado em kg = distância x 2 (ida e volta) x fator. */
     public double calcularCo2EvitadoKg(double distanciaKm) {
         return arredondar(distanciaKm * 2 * fatorCo2KgPorKm);
     }

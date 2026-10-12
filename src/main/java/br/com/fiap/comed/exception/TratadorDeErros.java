@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-/**
- * Converte as exceções da API em respostas RFC 9457 (ProblemDetail). As exceções padrão do
- * Spring MVC (405, parâmetro ausente etc.) já saem como ProblemDetail pela classe base.
- */
+/** Converte as exceções da API em ProblemDetail (RFC 9457); as do Spring MVC já saem assim pela classe base. */
 @RestControllerAdvice
 public class TratadorDeErros extends ResponseEntityExceptionHandler {
 

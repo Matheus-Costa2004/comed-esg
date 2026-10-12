@@ -25,10 +25,7 @@ import br.com.fiap.comed.repository.EventoAuditoriaRepository;
 import br.com.fiap.comed.repository.MedicoRepository;
 import br.com.fiap.comed.repository.PacienteRepository;
 
-/**
- * Sobe a aplicação inteira contra um MongoDB real (MONGODB_URI). Usa o database comed_it
- * para nunca tocar nos dados de desenvolvimento.
- */
+/** Sobe a aplicação inteira contra um MongoDB real, no database comed_it. */
 @SpringBootTest(properties = { "spring.data.mongodb.database=comed_it", "comed.seed.enabled=false" })
 @AutoConfigureMockMvc
 class ComedApiIT {

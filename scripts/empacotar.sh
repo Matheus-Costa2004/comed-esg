@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Gera comed-esg.zip na raiz do projeto, sem target/, .env, .git e node_modules.
-# Uso: ./scripts/empacotar.sh   (no Windows sem o comando zip, use scripts/empacotar.ps1)
+# Gera comed-esg.zip na raiz, sem target/, .env, .git e node_modules
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -8,7 +7,7 @@ DESTINO="comed-esg.zip"
 rm -f "$DESTINO"
 
 if command -v zip >/dev/null 2>&1; then
-  # O zip guarda os caminhos relativos; o prefixo comed-esg/ vem de um link temporário.
+  # Link temporário para os caminhos saírem com o prefixo comed-esg/
   TMP="$(mktemp -d)"
   trap 'rm -rf "$TMP"' EXIT
   ln -s "$PWD" "$TMP/comed-esg"

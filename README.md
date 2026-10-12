@@ -16,6 +16,13 @@ automatizados, containerização e pipeline CI/CD com deploy em **staging** e **
 
 **Integrantes (2TDSOC):** Lucas Gabriel Neres Sant'Ana (RM 565612) · Matheus Ferreira da Costa (RM 564003)
 
+**Ambientes publicados** (Render free: o primeiro acesso após inatividade pode levar cerca de 1 min):
+
+| Ambiente | URL |
+|---|---|
+| Staging | <https://comed-esg-staging.onrender.com> |
+| Produção | <https://comed-esg-prod.onrender.com> |
+
 ---
 
 ## Como executar localmente com Docker
@@ -144,39 +151,34 @@ O passo a passo de configuração está em [`docs/SETUP.md`](docs/SETUP.md).
 ```dockerfile
 # syntax=docker/dockerfile:1
 
-# ============================================================
-# Estágio 1 — build: compila o JAR com Maven + JDK 21
-# ============================================================
+# Build: compila o JAR com Maven e JDK 21
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /build
 
-# Cache de dependências: enquanto o pom.xml não mudar, esta camada é reaproveitada
-# e o build não baixa tudo de novo a cada alteração no código.
+# Cache das dependências do Maven
 COPY pom.xml .
 RUN mvn -B -q dependency:go-offline
 
 COPY src ./src
-# Os testes rodam no pipeline (jobs build-test e integration-test) antes da imagem ser gerada.
+# Os testes já rodaram no pipeline
 RUN mvn -B -q package -DskipTests \
  && java -Djarmode=tools -jar target/comed-esg.jar extract --layers --launcher --destination target/extracted
 
-# ============================================================
-# Estágio 2 — runtime: só a JRE, sem Maven nem código-fonte
-# ============================================================
+# Runtime: só a JRE, sem Maven nem código-fonte
 FROM eclipse-temurin:21-jre-alpine
 
-# O pipeline passa o SHA do commit; /api/info devolve esse valor como "versao".
+# O pipeline passa o SHA do commit, exibido em /api/info
 ARG APP_VERSION=dev
 ENV APP_VERSION=${APP_VERSION} \
     PORT=8080 \
     JAVA_OPTS="-XX:MaxRAMPercentage=75"
 
-# Usuário sem privilégios; /app/logs recebe o volume de logs no docker-compose.
+# Roda como usuário sem privilégios
 RUN addgroup -S comed && adduser -S -G comed comed \
  && mkdir -p /app/logs && chown -R comed:comed /app
 WORKDIR /app
 
-# Camadas do Spring Boot, da que menos muda para a que mais muda.
+# Camadas do Spring Boot, da que menos muda para a que mais muda
 COPY --from=build --chown=comed:comed /build/target/extracted/dependencies/ ./
 COPY --from=build --chown=comed:comed /build/target/extracted/spring-boot-loader/ ./
 COPY --from=build --chown=comed:comed /build/target/extracted/snapshot-dependencies/ ./
@@ -188,7 +190,7 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -qO- "http://localhost:${PORT}/actuator/health" | grep -q '"status":"UP"' || exit 1
 
-# sh -c para expandir JAVA_OPTS; exec para o Java ser o PID 1 e receber o SIGTERM (shutdown gracioso).
+# exec deixa o Java como PID 1 para receber o SIGTERM
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
 ```
 
@@ -220,47 +222,56 @@ ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS org.springframework.boot.loader.la
 
 ## Prints do funcionamento
 
-> As capturas ficam em [`docs/prints/`](docs/prints/); a lista com o que capturar está em
-> [`docs/prints/LEIA-ME.md`](docs/prints/LEIA-ME.md).
-
 **1. Pipeline: visão geral dos jobs**
-![Pipeline: visão geral](docs/prints/01-pipeline-visao-geral.png)
+![Pipeline: visão geral dos jobs](docs/prints/01%20pipeline%20geral.png)
 
 **2. Job de build e testes**
-![Job build-test](docs/prints/02-job-build-test.png)
+![Job de build e testes](docs/prints/02%20build%20e%20testes.png)
 
-**3. Resumo dos testes**
-![Resumo dos testes](docs/prints/03-resumo-testes.png)
+**3. `mvn verify` com os testes passando**
+![mvn verify com os testes passando](docs/prints/02-2%20mvn%20verify.png)
 
-**4. Imagem publicada no GHCR**
-![Imagem no GHCR](docs/prints/04-imagem-ghcr.png)
+**4. Resumo dos testes**
+![Resumo dos testes](docs/prints/03%20resumo%20testes.png)
 
-**5. Aprovação manual da produção**
-![Aprovação de produção](docs/prints/05-aprovacao-producao.png)
+**5. Imagem publicada no GHCR**
+![Imagem publicada no GHCR](docs/prints/04%20ghcr%20imagem.png)
 
-**6. Deploy no Render: staging**
-![Deploy staging no Render](docs/prints/06-render-deploy-staging.png)
+**6. Aprovação manual da produção**
+![Aprovação manual da produção](docs/prints/05-2%20production%20deploy%20review.png)
 
-**7. Deploy no Render: produção**
-![Deploy produção no Render](docs/prints/07-render-deploy-prod.png)
+**7. Deploy no Render: staging**
+![Deploy no Render: staging](docs/prints/06%20render%20staging.png)
 
-**8. Página de status em staging**
-![Status em staging](docs/prints/08-status-staging.png)
+**8. Deploy no Render: produção**
+![Deploy no Render: produção](docs/prints/07%20render%20prod.png)
 
-**9. Página de status em produção**
-![Status em produção](docs/prints/09-status-producao.png)
+**9. Página de status em staging**
+![Página de status em staging](docs/prints/08%20staging%20status.png)
 
-**10. `/api/esg/indicadores` em produção**
-![Indicadores ESG em produção](docs/prints/10-indicadores-esg-producao.png)
+**10. Página de status em produção**
+![Página de status em produção](docs/prints/09%20prod%20status.png)
 
-**11. Swagger UI**
-![Swagger](docs/prints/11-swagger.png)
+**11. `/api/esg/indicadores` em produção**
+![/api/esg/indicadores em produção](docs/prints/10%20prod%20indicadores.png)
 
-**12. `docker compose ps` local**
-![docker compose ps](docs/prints/12-docker-compose-ps.png)
+**12. Swagger UI**
+![Swagger UI](docs/prints/11-2%20swagger.png)
 
-**13. MongoDB Atlas com os dois databases**
-![Atlas](docs/prints/13-atlas-databases.png)
+**13. `docker compose up` local**
+![docker compose up local](docs/prints/12%20compose%20up.png)
+
+**14. `docker compose ps` local**
+![docker compose ps local](docs/prints/12-2%20compose%20ps.png)
+
+**15. Aplicação rodando localmente**
+![Aplicação rodando localmente](docs/prints/12-3%20app%20local.png)
+
+**16. MongoDB Atlas com os dois databases**
+![MongoDB Atlas com os dois databases](docs/prints/13%20atlas%20databases.png)
+
+**17. Environments do GitHub (revisores da produção)**
+![Environments do GitHub (revisores da produção)](docs/prints/14-2%20environments%20%28prod%20reviewers%29.png)
 
 ---
 
@@ -284,10 +295,10 @@ ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS org.springframework.boot.loader.la
 
 | Item | OK |
 |---|---|
-| Projeto compactado em .ZIP com estrutura organizada | ☐ |
-| Dockerfile funcional | ☐ |
-| docker-compose.yml ou arquivos Kubernetes | ☐ |
-| Pipeline com etapas de build, teste e deploy | ☐ |
-| README.md com instruções e prints | ☐ |
-| Documentação técnica com evidências (PDF ou PPT) | ☐ |
-| Deploy realizado nos ambientes staging e produção | ☐ |
+| Projeto compactado em .ZIP com estrutura organizada | ✅ |
+| Dockerfile funcional | ✅ |
+| docker-compose.yml ou arquivos Kubernetes | ✅ |
+| Pipeline com etapas de build, teste e deploy | ✅ |
+| README.md com instruções e prints | ✅ |
+| Documentação técnica com evidências (PDF ou PPT): [`docs/CoMed_ESG_Documentacao_DevOps.pdf`](docs/CoMed_ESG_Documentacao_DevOps.pdf) | ✅ |
+| Deploy realizado nos ambientes staging e produção | ✅ |

@@ -4,10 +4,10 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/comed}
-      # Cria os índices declarados nas entidades (ex.: Medico.crm único).
+      # Cria os índices das entidades (ex.: CRM único)
       auto-index-creation: true
   jackson:
-    # Campos ausentes não aparecem no JSON: cada documento mostra só o que tem.
+    # Campos nulos ficam fora do JSON
     default-property-inclusion: non_null
   mvc:
     problemdetails:
@@ -43,7 +43,7 @@ info:
     versao: ${comed.versao}
     ambiente: ${comed.ambiente}
 
-# Swagger habilitado de propósito em todos os ambientes: é evidência da entrega.
+# Swagger ligado também em produção, de propósito
 springdoc:
   swagger-ui:
     enabled: true
@@ -54,5 +54,5 @@ springdoc:
 
 logging:
   file:
-    # Vazio = só console. No docker-compose aponta para o volume api-logs.
+    # Vazio = só console; no docker-compose vai para o volume api-logs
     name: ${LOG_FILE:}

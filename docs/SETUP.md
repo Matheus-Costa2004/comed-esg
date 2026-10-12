@@ -3,10 +3,9 @@
 Este guia leva o projeto do repositório local até os ambientes de **staging** e **produção**.
 Siga na ordem: cada passo depende do anterior.
 
-
 **Pré-requisito: MongoDB Atlas.** O cluster `comed-esg` (projeto *CoMed ESG*, free, AWS São Paulo) recebe dois databases,
-`comed_staging` e `comed_prod`. As duas connection strings são entregues **só pelo chat**, nunca
-em arquivos do repositório. O acesso `0.0.0.0/0` fica liberado porque o Render free não tem IP fixo.
+`comed_staging` e `comed_prod`. As duas connection strings são configuradas **apenas nas variáveis de
+ambiente do Render, nunca no repositório**. O acesso `0.0.0.0/0` fica liberado porque o Render free não tem IP fixo.
 
 ---
 
@@ -63,7 +62,7 @@ Repita para cada ambiente em <https://dashboard.render.com> → **New** → **We
 
 | Variável | Staging | Produção |
 |---|---|---|
-| `MONGODB_URI` | string do chat terminada em `/comed_staging?...` | string do chat terminada em `/comed_prod?...` |
+| `MONGODB_URI` | connection string terminada em `/comed_staging?...` | connection string terminada em `/comed_prod?...` |
 | `APP_ENV` | `staging` | `production` |
 | `SPRING_PROFILES_ACTIVE` | `staging` | `prod` |
 | `SEED_ENABLED` | `true` | `true` |
@@ -93,7 +92,6 @@ No repositório: **Settings** → **Environments** → **New environment**.
 **`production`**
 - Marque **Required reviewers** e adicione você e o Lucas. Deixe *Prevent self-review*
   desmarcado para conseguir aprovar o próprio deploy.
-- *Deployment branches and tags* → **Selected branches and tags** → `main`.
 - *Environment secrets* → `RENDER_DEPLOY_HOOK_PROD` = hook do `comed-esg-prod`
 - *Environment variables* → `PROD_URL` = URL pública da produção (sem `/` no final)
 
@@ -113,8 +111,6 @@ O que acontece:
    → **Approve and deploy**.
 3. O mesmo deploy + smoke test roda contra `PROD_URL`.
 
-Com tudo verde, tire os prints listados em [`docs/prints/LEIA-ME.md`](prints/LEIA-ME.md).
-
 ## 8. Validar o docker-compose (local ou no Codespace)
 
 O pipeline não usa o `docker-compose.yml`; ele é o ambiente local. Se o Docker não sobe na sua
@@ -126,7 +122,7 @@ máquina, valide-o num **GitHub Codespace**, que já vem com Docker e Compose v2
    ```bash
    cp .env.example .env            # troque as senhas no .env
    docker compose up -d --build
-   docker compose ps               # comed-api e comed-mongo "healthy" → print 12
+   docker compose ps               # comed-api e comed-mongo "healthy"
    ```
 
 3. Aba **Ports** → porta `8080` → ícone de globo abre a página de status

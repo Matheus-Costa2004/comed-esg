@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CoMed ESG · Status</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f766e'/><path d='M13 8h6v5h5v6h-5v5h-6v-5H8v-6h5z' fill='white'/></svg>">
+  <style>
+    :root {
+      --bg: #f4f6f5;
+      --card: #ffffff;
+      --text: #14201d;
+      --muted: #5b6b66;
+      --line: #dfe5e3;
+      --brand: #0f766e;
+      --amb: #15803d;
+      --soc: #1d4ed8;
+      --gov: #7c3aed;
+      --badge-local: #6b7280;
+      --badge-staging: #d97706;
+      --badge-production: #16a34a;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1412;
+        --card: #16201d;
+        --text: #e6eeeb;
+        --muted: #93a39e;
+        --line: #26332f;
+        --brand: #2dd4bf;
+        --amb: #4ade80;
+        --soc: #60a5fa;
+        --gov: #a78bfa;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; }
+    header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; justify-content: space-between; }
+    h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
+    h1 span { color: var(--brand); }
+    .sub { margin: 4px 0 0; color: var(--muted); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 999px;
+      font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; font-size: 14px;
+      color: #fff; background: var(--badge-local);
+    }
+    .badge::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; opacity: .85; }
+    .badge.staging { background: var(--badge-staging); }
+    .badge.production { background: var(--badge-production); }
+    .meta {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+      margin: 24px 0;
+    }
+    .meta div, .pilar { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+    .meta div { padding: 12px 16px; }
+    .meta dt { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    .meta dd { margin: 2px 0 0; font-weight: 600; font-family: ui-monospace, "Cascadia Code", Consolas, monospace; overflow-wrap: anywhere; }
+    .pilares { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .pilar { padding: 20px; border-top: 4px solid var(--c); }
+    .pilar h2 { margin: 0 0 14px; font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: var(--c); }
+    .pilar ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    .pilar li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+    .pilar li:last-child { border-bottom: 0; padding-bottom: 0; }
+    .pilar .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .pilar .l { color: var(--muted); font-size: 14px; }
+    .amb { --c: var(--amb); }
+    .soc { --c: var(--soc); }
+    .gov { --c: var(--gov); }
+    nav { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    nav a {
+      padding: 10px 16px; border-radius: 10px; text-decoration: none; font-weight: 600;
+      border: 1px solid var(--line); background: var(--card); color: var(--text);
+    }
+    nav a:hover { border-color: var(--brand); color: var(--brand); }
+    .erro { margin-top: 16px; padding: 12px 16px; border-radius: 10px; background: #fee2e2; color: #991b1b; display: none; }
+    footer { margin-top: 32px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Co<span>Med</span> ESG</h1>
+      <p class="sub">Copiloto de IA clínica · Projeto Cidades ESG Inteligentes</p>
+    </div>
+    <span id="ambiente" class="badge">carregando…</span>
+  </header>
+
+  <dl class="meta">
+    <div><dt>Versão (commit)</dt><dd id="versao">…</dd></div>
+    <div><dt>Aplicação</dt><dd id="aplicacao">…</dd></div>
+    <div><dt>Health</dt><dd id="health">…</dd></div>
+    <div><dt>Atualizado em</dt><dd id="timestamp">…</dd></div>
+  </dl>
+
+  <section class="pilares">
+    <article class="pilar amb">
+      <h2>Ambiental</h2>
+      <ul>
+        <li><span class="l">Teleconsultas concluídas</span><span class="v" id="tele">–</span></li>
+        <li><span class="l">CO₂ evitado</span><span class="v" id="co2">–</span></li>
+        <li><span class="l">Deslocamento evitado</span><span class="v" id="km">–</span></li>
+      </ul>
+    </article>
+    <article class="pilar soc">
+      <h2>Social</h2>
+      <ul>
+        <li><span class="l">Pacientes atendidos</span><span class="v" id="pacientes">–</span></li>
+        <li><span class="l">Em vulnerabilidade social</span><span class="v" id="vulneraveis">–</span></li>
+        <li><span class="l">Percentual vulnerável</span><span class="v" id="percentual">–</span></li>
+      </ul>
+    </article>
+    <article class="pilar gov">
+      <h2>Governança</h2>
+      <ul>
+        <li><span class="l">Alertas de alto risco pendentes</span><span class="v" id="alertas">–</span></li>
+        <li><span class="l">Médicos com pendência</span><span class="v" id="medicos">–</span></li>
+        <li><span class="l">Eventos de auditoria LGPD</span><span class="v" id="auditoria">–</span></li>
+      </ul>
+    </article>
+  </section>
+
+  <p id="erro" class="erro"></p>
+
+  <nav>
+    <a href="swagger-ui.html">Swagger UI</a>
+    <a href="actuator/health">Health</a>
+    <a href="api/info">/api/info</a>
+    <a href="api/esg/indicadores">/api/esg/indicadores</a>
+  </nav>
+
+  <footer>FIAP · Navegando pelo mundo DevOps · Lucas Gabriel Neres Sant'Ana e Matheus Ferreira da Costa (2TDSOC)</footer>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const num = (v, casas = 0) => Number(v).toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
+
+  function mostrarErro(msg) {
+    $("erro").textContent = msg;
+    $("erro").style.display = "block";
+  }
+
+  async function json(url) {
+    const r = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!r.ok && r.status !== 503) throw new Error(url + " respondeu " + r.status);
+    return r.json();
+  }
+
+  async function carregar() {
+    try {
+      const info = await json("api/info");
+      const amb = (info.ambiente || "local").toLowerCase();
+      const badge = $("ambiente");
+      badge.textContent = amb;
+      badge.className = "badge " + (amb === "staging" || amb === "production" ? amb : "local");
+      document.title = "CoMed ESG · " + amb;
+      $("versao").textContent = (info.versao || "dev").substring(0, 7);
+      $("versao").title = info.versao;
+      $("aplicacao").textContent = info.aplicacao;
+      $("timestamp").textContent = new Date(info.timestamp).toLocaleString("pt-BR");
+    } catch (e) {
+      mostrarErro("Não foi possível ler /api/info: " + e.message);
+    }
+
+    try {
+      const h = await json("actuator/health");
+      $("health").textContent = h.status;
+      $("health").style.color = h.status === "UP" ? "var(--badge-production)" : "#dc2626";
+    } catch (e) {
+      $("health").textContent = "indisponível";
+    }
+
+    try {
+      const i = await json("api/esg/indicadores");
+      $("tele").textContent = num(i.ambiental.consultasTelemedicinaConcluidas);
+      $("co2").textContent = num(i.ambiental.co2EvitadoKg, 1) + " kg";
+      $("km").textContent = num(i.ambiental.kmEvitados, 0) + " km";
+      $("pacientes").textContent = num(i.social.totalPacientes);
+      $("vulneraveis").textContent = num(i.social.pacientesVulneraveis);
+      $("percentual").textContent = num(i.social.percentualVulneraveis, 1) + "%";
+      $("alertas").textContent = num(i.governanca.alertasAltoRiscoPendentes);
+      $("medicos").textContent = num(i.governanca.medicosComPendencia);
+      $("auditoria").textContent = num(i.governanca.eventosAuditoria);
+    } catch (e) {
+      mostrarErro("Não foi possível ler /api/esg/indicadores: " + e.message);
+    }
+  }
+
+  carregar();
+</script>
+</body>
+</html>

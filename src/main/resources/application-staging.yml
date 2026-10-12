@@ -1,0 +1,6 @@
+# Staging: logs detalhados da aplicação para depurar antes da produção.
+logging:
+  level:
+    root: INFO
+    br.com.fiap.comed: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG

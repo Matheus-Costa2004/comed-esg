@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: comed-esg
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/comed}
+      # Cria os índices declarados nas entidades (ex.: Medico.crm único).
+      auto-index-creation: true
+  jackson:
+    # Campos ausentes não aparecem no JSON: cada documento mostra só o que tem.
+    default-property-inclusion: non_null
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+
+comed:
+  ambiente: ${APP_ENV:local}
+  versao: ${APP_VERSION:dev}
+  seed:
+    enabled: ${SEED_ENABLED:false}
+  esg:
+    fator-co2-kg-por-km: ${FATOR_CO2_KG_POR_KM:0.13}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-components: always
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    nome: CoMed ESG
+    versao: ${comed.versao}
+    ambiente: ${comed.ambiente}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  file:
+    # Vazio = só console. No docker-compose aponta para o volume api-logs.
+    name: ${LOG_FILE:}

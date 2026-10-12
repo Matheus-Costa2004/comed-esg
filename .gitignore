@@ -1,0 +1,23 @@
+# Build
+target/
+*.log
+logs/
+
+# Credenciais locais (use .env.example como modelo)
+.env
+
+# Pacote de entrega gerado por scripts/empacotar
+comed-esg.zip
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+
+# SO
+.DS_Store
+Thumbs.db

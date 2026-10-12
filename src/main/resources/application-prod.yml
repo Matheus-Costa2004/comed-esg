@@ -1,0 +1,6 @@
+# Produção: só o essencial no log.
+logging:
+  level:
+    root: WARN
+    br.com.fiap.comed: INFO
+    org.springframework.boot.web.embedded.tomcat: INFO

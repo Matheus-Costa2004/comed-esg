@@ -1,0 +1,173 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Um pipeline por branch; um deploy em andamento nunca é cancelado no meio.
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ----------------------------------------------------------------- CI
+  build-test:
+    name: Build e testes unitários
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Build, testes e cobertura (mvn verify)
+        run: ./mvnw -B verify
+
+      - name: Resumo dos testes
+        if: always()
+        run: python3 .github/scripts/resumo-testes.py "Testes unitários e de controller" target/surefire-reports target/site/jacoco/jacoco.csv
+
+      - name: Publicar relatórios (surefire + JaCoCo)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: relatorios-build-test
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+          retention-days: 14
+
+  integration-test:
+    name: Testes de integração (MongoDB)
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      MONGODB_URI: mongodb://localhost:27017/comed
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Testes de integração (mvn verify -Pintegration)
+        run: ./mvnw -B verify -Pintegration
+
+      - name: Resumo dos testes
+        if: always()
+        run: python3 .github/scripts/resumo-testes.py "Testes de integração" target/failsafe-reports target/site/jacoco/jacoco.csv
+
+      - name: Publicar relatórios (failsafe + JaCoCo)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: relatorios-integration-test
+          path: |
+            target/failsafe-reports/
+            target/site/jacoco/
+          retention-days: 14
+
+  # ----------------------------------------------------------------- CD
+  docker:
+    name: Imagem Docker → GHCR
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build-test, integration-test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      imagem: ${{ steps.nome.outputs.imagem }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Nome da imagem (o GHCR exige minúsculas)
+        id: nome
+        run: echo "imagem=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/comed-esg" >> "$GITHUB_OUTPUT"
+
+      - name: Login no GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build
+        env:
+          IMAGEM: ${{ steps.nome.outputs.imagem }}
+        run: |
+          docker build \
+            --build-arg APP_VERSION=${{ github.sha }} \
+            --label org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }} \
+            --label org.opencontainers.image.revision=${{ github.sha }} \
+            -t "$IMAGEM:${{ github.sha }}" \
+            -t "$IMAGEM:latest" \
+            .
+
+      - name: Push (:sha e :latest)
+        env:
+          IMAGEM: ${{ steps.nome.outputs.imagem }}
+        run: |
+          docker push "$IMAGEM:${{ github.sha }}"
+          docker push "$IMAGEM:latest"
+          {
+            echo "## 🐳 Imagem publicada"
+            echo ""
+            echo "- \`$IMAGEM:${{ github.sha }}\`"
+            echo "- \`$IMAGEM:latest\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-staging:
+    name: Deploy em staging
+    needs: docker
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Deploy no Render + smoke test
+        env:
+          AMBIENTE: staging
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_STAGING }}
+          APP_URL: ${{ vars.STAGING_URL }}
+          IMAGEM: ${{ needs.docker.outputs.imagem }}:${{ github.sha }}
+          VERSAO: ${{ github.sha }}
+        run: bash .github/scripts/deploy-render.sh
+
+  deploy-production:
+    name: Deploy em produção
+    # A aprovação manual vem dos "Required reviewers" do environment production.
+    needs: [docker, deploy-staging]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.PROD_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Deploy no Render + smoke test
+        env:
+          AMBIENTE: production
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_PROD }}
+          APP_URL: ${{ vars.PROD_URL }}
+          IMAGEM: ${{ needs.docker.outputs.imagem }}:${{ github.sha }}
+          VERSAO: ${{ github.sha }}
+        run: bash .github/scripts/deploy-render.sh
